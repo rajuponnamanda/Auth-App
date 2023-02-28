@@ -12,4 +12,4 @@ cache : {
 }
 
 export const graphScopes ={scopes:["openid", "profile", "email","User.Read"]}
-export const myMSALObj =new msal.UserAgentApplication(msalConfig)
+export const myMSALObj =new msal.UserAgentApplication(msalConfig as msal.Configuration)
