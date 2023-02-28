@@ -17,13 +17,10 @@
     </div>
     <div v-if="account.profileImageUrl">
         <img :src="account.profileImageUrl" alt="Profile Image" class="img-fluid rounded  my-5  d-block" style="max-height: 200px;">
-      </div>
-    <div class="py-5">
       <h4 class="text-center">{{ account.name }}</h4>
       <h4 class="text-center">{{ account.username }}</h4>
-      
     </div>
-  </div>
+    </div>
 </template>
 
 <script lang="ts" setup>
