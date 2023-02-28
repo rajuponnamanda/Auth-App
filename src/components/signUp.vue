@@ -1,8 +1,8 @@
 <template>
   <div class="container-flud">
-    <nav class="navbar bg-primary">
+    <nav class="navbar bg-warning">
       <div class="container mx-0">
-        <h3 class="p-0 text-light">Vue</h3>
+        <h3 class="p-0 text-dark">Vue</h3>
       </div>
     </nav>
     <div v-if="!authenticated">
@@ -15,12 +15,12 @@
         Logout
       </button>
     </div>
-    <div v-if="account.profileImageUrl">
-        <img :src="account.profileImageUrl" alt="Profile Image" class="img-fluid rounded  my-5  d-block" style="max-height: 200px;">
-      <h4 class="text-center">{{ account.name }}</h4>
-      <h4 class="text-center">{{ account.username }}</h4>
+    <div v-if="account.profileImageUrl" class="profile">
+        <img :src="account.profileImageUrl" alt="Profile Image" class="image" style="max-height:200px;">
+      <h4 >{{ account.name }}</h4>
+      <h4 >{{ account.username }}</h4>
     </div>
-    </div>
+  </div>
 </template>
 
 <script lang="ts" setup>
@@ -33,10 +33,8 @@ interface Account {
   username: string;
   profileImageUrl?: string;
 }
-
 const authenticated = ref<boolean>(false);
 const account = ref<Account>({ name: '', username: '' });
-
 const login = async () => {
   try {
     myMSALObj.loginRedirect(graphScopes);
@@ -46,7 +44,6 @@ const login = async () => {
     const response = await axios.get('https://graph.microsoft.com/v1.0/me',  { headers });
     console.log(response);
     localStorage.setItem("accessToken",accessToken);
-  
   } catch (err) {
     console.error(err);
   };
@@ -98,3 +95,16 @@ onMounted(async () => {
 }
 });
 </script>
+<style>
+.profile{
+  align-content: center;
+  margin-left:42%;
+}
+.image{
+  border-radius:50%;
+  margin-top: 20%;
+  margin-bottom:30px;
+  border-style: ridge;
+  border-width: 10px;
+}
+</style>
