@@ -1,0 +1,50 @@
+trigger:
+    batch: true
+    branches:
+        include:
+        - main
+        - develop
+        - master
+    paths:
+        include: 
+        - Authentcation
+
+pool:
+  name: 'Azure Pipelines'
+
+
+variables:
+  isMain: $[eq(variables['Build.SourceBranch'], 'refs/heads/main')] #not used
+  isDev: $[eq(variables['Build.SourceBranch'], 'refs/heads/develop')] #not used
+  test: ""
+  vmImage : 'windows-latest'
+
+stages:
+- template: templates\stage_level_templates\test_build_stage_template.yml # stage template to test, build and push
+  parameters:
+    projectFolder: Authentcation #${{variables.projectFolder}}
+    buildOutputFolder: Authentcation/dist #${{variables.buildOutputFolder}}
+    sourceFolder: $(SOURCEFOLDER) #${{variables.sourceFolder}}
+    vmImageName: $(VMIMAGE)
+    
+
+- template: templates\stage_level_templates\az_deployment_stage_template.yml # stage template for azure resource deployment to Develop
+  parameters:
+   vmImageName : $(VMIMAGE) #${{variables.vmImage}}
+   azureSubscription : Interns
+   resourceGroup : "raj"
+   bicepFilePath : "Infrastructure/main.bicep"
+   parameterFilePath : "Infrastructure/main.parameters.dev.json"
+   jobName : "resourcedeployment"
+   jobDescription : "deployemnt of resources"
+   scriptType : "bash"
+   environment: 'Dev'
+   deploy: true
+
+- template: templates\stage_level_templates\app_deployment_stage_template.yml #stage template for application deployment
+  parameters:
+    serviceConnection: "Interns"
+    subscriptionId: 'dev'
+    environment: 'Dev'
+    appType: 'webApp'
+    appName: 'pipeline-dev-as'

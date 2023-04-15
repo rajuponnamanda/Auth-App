@@ -1,0 +1,65 @@
+parameters:
+  - name: buildName
+    type: string
+  - name: projectFolder
+    type: string
+  - name: buildOutputFolder
+    type: string
+  - name: vmImageName
+    type: string
+
+jobs:
+  - job: 'build_test_${{ parameters.buildName }}'
+    displayName: 'build  and test ${{ parameters.buildName }}'
+    pool:
+      vmImage: ${{ parameters.vmImageName}}
+    steps:
+      - task: Npm@1
+        displayName: npm install
+        inputs:
+          workingDir: ${{parameters.projectFolder}}
+          verbose: true
+      - task: Npm@1
+        displayName: build
+        inputs:
+          command: custom
+          workingDir: ${{parameters.projectFolder}}
+          verbose: true
+          customCommand: run build
+      - task: Npm@1
+        displayName: npm unit tests
+        inputs:
+          workingDir: ${{parameters.projectFolder}}
+          verbose: true
+          customCommand: run coverage
+
+      - task: PublishTestResults@2
+        displayName: 'Publish test results'
+        condition: succeededOrFailed()
+        inputs:
+          searchFolder: '$(System.DefaultWorkingDirectory)/Unit-test-CC/junit'
+          testResultsFormat: JUnit
+          testResultsFiles: "**/TESTS*.xml"
+
+      - task: PublishCodeCoverageResults@1
+        displayName: 'Publish code coverage Angular results'
+        condition: succeededOrFailed()
+        inputs:
+          codeCoverageTool: Cobertura
+          summaryFileLocation: Unit-test-CC/unit-test-CC/coverage/unit-test-CC/cobertura-coverage.xml
+          reportDirectory: Unit-test-CC/unit-test-CC/coverage
+          failIfCoverageEmpty: false
+
+      - task: CopyPublishBuildArtifacts@1
+        inputs:
+          CopyRoot: '${{parameters.buildOutputFolder}}'
+          Contents: '**'
+          ArtifactName: 'drop'
+          ArtifactType: 'Container'
+
+      - task: DownloadBuildArtifacts@1
+        inputs:
+          buildType: 'current'
+          downloadType: 'single'
+          artifactName: 'drop'
+          downloadPath: '${{parameters.buildOutputFolder}}'
